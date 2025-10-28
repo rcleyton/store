@@ -7,6 +7,20 @@ class CartsController < ApplicationController
     item.quantity = (item.quantity || 0) + params[:quantity].to_i
     item.save! 
 
+    render_cart
+  end
+
+  def show
+    render_cart
+  end
+
+  private
+
+  def set_cart
+    @cart = current_cart
+  end
+
+  def render_cart
     render json: { 
       id: @cart.id,
       products: @cart.cart_items.map do |item|
@@ -21,11 +35,4 @@ class CartsController < ApplicationController
       total_price: @cart.total_price
     }
   end
-
-  private
-
-  def set_cart
-    @cart = current_cart
-  end
 end
-

@@ -40,6 +40,30 @@ RSpec.describe "/carts", type: :request do
     end
   end
 
+  describe "GET /cart" do
+    let(:product) { Product.create(name: "Test Product", price: 10.0) }
+
+    context "when there is already a cart in the session" do
+      it "List items in current cart" do
+        post "/cart", params: { product_id: product.id, quantity: 2 }
+
+        json_post = JSON.parse(response.body)
+        first_cart_id = json_post["id"]
+
+        get "/cart"
+        expect(response).to have_http_status(:ok)
+
+        json_get = JSON.parse(response.body)
+
+        expect(json_get["id"]).to eq(first_cart_id)
+        expect(json_get["products"].first["name"]).to eq("Test Product")
+        expect(json_get["products"].first["quantity"]).to eq(2)
+        expect(json_get["products"].first["unit_price"]).to eq("10.0")
+        expect(json_get["total_price"]).to eq("20.0")
+      end
+    end
+  end
+
   describe "POST /add_items" do
     let(:cart) { Cart.create }
     let(:product) { Product.create(name: "Test Product", price: 10.0) }
