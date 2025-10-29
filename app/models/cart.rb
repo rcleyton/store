@@ -8,5 +8,21 @@ class Cart < ApplicationRecord
     cart_items.sum(&:total_price)
   end
 
-  # TODO: lógica para marcar o carrinho como abandonado e remover se abandonado
+  def mark_as_abandoned
+    return if abandoned?
+
+    if last_interaction_at.present? && last_interaction_at < 3.hours.ago
+      update!(abandoned: true)
+    end
+  end
+
+  def remove_if_abandoned
+    if abandoned? && last_interaction_at.present? && last_interaction_at < 7.days.ago
+      destroy
+    end
+  end
+
+  def touch_interaction!
+    update!(last_interaction_at: Time.current, abandoned: false)
+  end
 end

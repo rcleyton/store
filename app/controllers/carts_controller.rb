@@ -7,6 +7,7 @@ class CartsController < ApplicationController
     item.quantity = (item.quantity || 0) + params[:quantity].to_i
     item.save! 
 
+    @cart.touch_interaction!
     render_cart
   end
 
@@ -24,6 +25,7 @@ class CartsController < ApplicationController
       item = @cart.cart_items.create!(product:, quantity: params[:quantity])
     end
 
+    @cart.touch_interaction!
     render_cart
   end
 
@@ -32,6 +34,7 @@ class CartsController < ApplicationController
 
     if item
       item.destroy
+      @cart.touch_interaction!
       render_cart
     else
       render json: { error: "Product not found in cart." }, status: :not_found
