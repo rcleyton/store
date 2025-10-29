@@ -14,6 +14,19 @@ class CartsController < ApplicationController
     render_cart
   end
 
+  def add_item
+    product = Product.find(params[:product_id])    
+    item = @cart.cart_items.find_by(product: product)
+    
+    if item
+      item.update!(quantity: item.quantity + params[:quantity].to_i)
+    else
+      item = @cart.cart_items.create!(product:, quantity: params[:quantity])
+    end
+
+    render_cart
+  end
+
   private
 
   def set_cart

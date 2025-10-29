@@ -2,12 +2,15 @@ class ApplicationController < ActionController::API
   include ActionController::Cookies
 
   def current_cart
-    if session[:cart_id]
-      Cart.find(session[:cart_id])
-    else 
-      cart = Cart.create!
-      session[:cart_id] = cart.id
-      cart
+    @cart ||= begin
+      if session[:cart_id] && Cart.exists?(session[:cart_id])
+        Cart.find(session[:cart_id])
+      else
+        Cart.last || Cart.create!
+      end
     end
+
+    session[:cart_id] = @cart.id
+    @cart
   end
 end
