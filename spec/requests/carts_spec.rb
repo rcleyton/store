@@ -80,4 +80,50 @@ RSpec.describe "/carts", type: :request do
       end
     end
   end
+
+  describe "DELETE /cart/:product_id" do
+    let(:cart) { Cart.create! }
+    let(:first_product) { Product.create!(name: "Product 1", price: 10.0) }
+    let(:second_product) { Product.create!(name: "Product 2", price: 20.0) }
+
+    before do
+      cart.cart_items.create!(product: first_product, quantity: 1)
+      cart.cart_items.create!(product: second_product, quantity: 2)
+    end
+
+    context "when the product is in the cart" do
+      it "remove the product and return the updated cart." do
+        expect {
+          delete "/cart/#{first_product.id}"
+        }.to change { cart.cart_items.count }.by(-1)
+
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "when the product is not in the cart" do
+      it "returns error 404 and appropriate message." do
+        delete "/cart/99999"
+
+        expect(response).to have_http_status(:not_found)
+        json = JSON.parse(response.body)
+        expect(json["error"]).to eq("Product not found in cart.")
+      end
+    end
+
+    context "when the last product is removed" do
+      it "returns empty cart" do
+        cart.cart_items.destroy_all
+        cart.cart_items.create!(product: first_product, quantity: 1)
+
+        delete "/cart/#{first_product.id}"
+
+        expect(response).to have_http_status(:ok)
+        json = JSON.parse(response.body)
+
+        expect(json["products"]).to eq([])
+        expect(json["total_price"]).to eq(0)
+      end
+    end
+  end
 end

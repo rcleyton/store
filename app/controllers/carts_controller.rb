@@ -27,6 +27,17 @@ class CartsController < ApplicationController
     render_cart
   end
 
+  def destroy
+    item = @cart.cart_items.find_by(product_id: params[:product_id])
+
+    if item
+      item.destroy
+      render_cart
+    else
+      render json: { error: "Product not found in cart." }, status: :not_found
+    end
+  end
+
   private
 
   def set_cart
