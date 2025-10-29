@@ -9,17 +9,30 @@
 #   end
 
 
-Product.create([
-  {
-    name: 'Samsung Galaxy S24 Ultra',
-    price: 12999.99
-  },
-  {
-    name: 'iPhone 15 Pro Max',
-    price: 14999.99
-  },
-  {
-    name: 'Xiamo Mi 27 Pro Plus Master Ultra',
-    price: 999.99
-  }
+# Products
+products = Product.create([
+  { name: 'Samsung Galaxy S24 Ultra', price: 12999.99 },
+  { name: 'iPhone 15 Pro Max', price: 14999.99 },
+  { name: 'Xiamo Mi 27 Pro Plus Master Ultra', price: 999.99 }
 ])
+
+# Carts
+Cart.create([
+  {
+    last_interaction_at: 1.hour.ago, 
+    abandoned: false,
+    total_price: 0.0
+  },
+  {
+    last_interaction_at: 4.hours.ago,
+    abandoned: false,
+    total_price: 0.0
+  },
+  {
+    last_interaction_at: 8.days.ago,
+    abandoned: true,
+    total_price: 0.0
+  }
+]).each do |cart|
+  cart.cart_items.create(product: products.sample, quantity: rand(1..3))
+end

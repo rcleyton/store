@@ -1,0 +1,5 @@
+abandoned_carts_job:
+  cron: "0 * * * *"
+  class: "AbandonedCartsJob"
+  queue: "default"
+  description: "It marks inactive shopping carts and removes carts abandoned for more than 7 days."
