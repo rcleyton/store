@@ -6,12 +6,13 @@ class CartsController < ApplicationController
   
   def create
     product = Product.find(params[:product_id])
+    quantity = params[:quantity].to_i
+
+    raise InvalidQuantityError, "Quantity must be at least 1" if quantity < 1
+
     item = @cart.cart_items.find_or_initialize_by(product: product)
-    item.quantity = (item.quantity || 0) + params[:quantity].to_i
-
-    raise InvalidQuantityError, "Quantity must be at least 1" if item.quantity < 1
-
-    item.save! 
+    item.quantity = (item.quantity || 0) + quantity
+    item.save!
 
     @cart.touch_interaction!
     render_cart

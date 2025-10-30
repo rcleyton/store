@@ -46,6 +46,8 @@ bundle exec rspec
 - [x] Criar um endpoint para inserção de produtos no carrinho;
 - [x] Se não existir um carrinho para a sessão, criar o carrinho e salvar o ID do carrinho na sessão;
 - [x] Adicionar o produto no carrinho e devolver o payload com a lista de produtos do carrinho atual;
+- [x] Produto deve existir para ser adicionado ao carrinho;
+- [x] Quantidade mínima de produto é 1;
  
  POST /cart
 ```bash
@@ -108,6 +110,8 @@ RESPONSE
 ## 3. Alterar a quantidade de produtos no carrinho
 - [x] Adiciona um novo ítem no carrinho;
 - [x] Altera a quantidade se o produto já existir no carrinho;
+- [x] Produto deve existir para ser adicionado ao carrinho;
+- [x] Quantidade mínima de produto é 1;
 
 POST cart/add_item
 ```bash
