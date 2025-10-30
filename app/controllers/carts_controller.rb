@@ -1,5 +1,8 @@
 class CartsController < ApplicationController
   before_action :set_cart
+
+  rescue_from InvalidQuantityError, with: :render_invalid_quantity
+  rescue_from ActiveRecord::RecordNotFound, with: :render_record_not_found
   
   def create
     product = Product.find(params[:product_id])
@@ -12,8 +15,6 @@ class CartsController < ApplicationController
 
     @cart.touch_interaction!
     render_cart
-  rescue InvalidQuantityError => e
-    render json: { error: e.message }, status: :unprocessable_entity
   end
 
   def show
@@ -36,10 +37,6 @@ class CartsController < ApplicationController
 
     @cart.touch_interaction!
     render_cart
-  rescue InvalidQuantityError => e
-    render json: { error: e.message }, status: :unprocessable_entity
-  rescue ActiveRecord::RecordInvalid => e
-    render json: { error: e.record.errors.full_messages }, status: :unprocessable_entity
   end
 
   def destroy
@@ -74,5 +71,13 @@ class CartsController < ApplicationController
       end,
       total_price: @cart.total_price
     }
+  end
+
+  def render_invalid_quantity(exception)
+    render json: { error: exception.message }, status: :unprocessable_entity
+  end
+
+  def render_record_not_found(_exception)
+    render json: { error: "Product not found" }, status: :not_found
   end
 end

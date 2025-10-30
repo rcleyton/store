@@ -43,6 +43,14 @@ RSpec.describe "/carts", type: :request do
 
         expect(JSON.parse(response.body)["error"]).to eq("Quantity must be at least 1")
       end
+
+      context "product" do
+        it "does not exist" do
+          post "/cart", params: { product_id: 999, quantity: 2 }
+
+          expect(JSON.parse(response.body)["error"]).to eq("Product not found")
+        end
+      end
     end
   end
 
@@ -89,6 +97,14 @@ RSpec.describe "/carts", type: :request do
         post "/cart", params: { product_id: product.id, quantity: -1 }
 
         expect(JSON.parse(response.body)["error"]).to eq("Quantity must be at least 1")
+      end
+    end
+
+    context "product" do
+      it "does not exist" do
+        post "/cart", params: { product_id: 1000, quantity: 2 }
+
+        expect(JSON.parse(response.body)["error"]).to eq("Product not found")
       end
     end
   end
