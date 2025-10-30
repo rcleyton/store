@@ -37,6 +37,12 @@ RSpec.describe "/carts", type: :request do
         
         expect(second_cart_id).to eq(first_cart_id)
       end
+
+      it 'quantity must be greater than or equal to 1' do
+        post "/cart", params: { product_id: product.id, quantity: -1 }
+
+        expect(JSON.parse(response.body)["error"]).to eq("Quantity must be at least 1")
+      end
     end
   end
 
@@ -77,6 +83,12 @@ RSpec.describe "/carts", type: :request do
 
       it 'updates the quantity of the existing item in the cart' do
         expect { subject }.to change { cart_item.reload.quantity }.by(2)
+      end
+
+      it 'quantity must be greater than or equal to 1' do
+        post "/cart", params: { product_id: product.id, quantity: -1 }
+
+        expect(JSON.parse(response.body)["error"]).to eq("Quantity must be at least 1")
       end
     end
   end

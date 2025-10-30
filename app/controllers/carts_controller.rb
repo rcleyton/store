@@ -5,10 +5,15 @@ class CartsController < ApplicationController
     product = Product.find(params[:product_id])
     item = @cart.cart_items.find_or_initialize_by(product: product)
     item.quantity = (item.quantity || 0) + params[:quantity].to_i
+
+    raise InvalidQuantityError, "Quantity must be at least 1" if item.quantity < 1
+
     item.save! 
 
     @cart.touch_interaction!
     render_cart
+  rescue InvalidQuantityError => e
+    render json: { error: e.message }, status: :unprocessable_entity
   end
 
   def show
@@ -16,17 +21,25 @@ class CartsController < ApplicationController
   end
 
   def add_item
-    product = Product.find(params[:product_id])    
+    product = Product.find(params[:product_id])
+    quantity = params[:quantity].to_i
+
+    raise InvalidQuantityError, "Quantity must be at least 1" if quantity < 1
+
     item = @cart.cart_items.find_by(product: product)
-    
+
     if item
-      item.update!(quantity: item.quantity + params[:quantity].to_i)
+      item.update!(quantity: item.quantity + quantity)
     else
-      item = @cart.cart_items.create!(product:, quantity: params[:quantity])
+      item = @cart.cart_items.create!(product:, quantity:)
     end
 
     @cart.touch_interaction!
     render_cart
+  rescue InvalidQuantityError => e
+    render json: { error: e.message }, status: :unprocessable_entity
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { error: e.record.errors.full_messages }, status: :unprocessable_entity
   end
 
   def destroy
