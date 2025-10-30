@@ -1,3 +1,211 @@
+# Implementação da resolução do desafio técnico e-commerce
+
+## Como executar o projeto
+
+[Dependências](#dependências) do projeto
+
+### **1️⃣ Clonar o repositório**
+```bash
+git clone git@github.com:rcleyton/store.git
+cd store
+```
+
+### **2️⃣ Configurar variáveis de ambiente**
+O projeto utiliza variáveis de ambiente para se conectar ao banco de dados.
+Antes de rodar o Rails, defina-as no terminal:
+```bash
+export DB_USERNAME=seu_usuario_postgres
+export DB_PASSWORD=sua_senha_postgres
+```
+💡 Dica: adicione esses exports no seu arquivo ~/.bashrc, ~/.zshrc ou equivalente para que fiquem persistentes.
+
+### **3️⃣ Criar e preparar o banco de dados**
+Execute os comandos:
+```bash
+rails db:create db:migrate db:seed
+```
+
+### **4️⃣ Executar a app**
+```bash
+# Instalar as dependências do projeto:
+bundle install
+
+# Executar Sidekiq:
+bundle exec sidekiq
+
+# Executar o projeto:
+bundle exec rails server
+
+# Executar os testes:
+bundle exec rspec
+```
+
+# Casos de uso
+
+## 1. Registrar um produto no carrinho
+- [x] Criar um endpoint para inserção de produtos no carrinho;
+- [x] Se não existir um carrinho para a sessão, criar o carrinho e salvar o ID do carrinho na sessão;
+- [x] Adicionar o produto no carrinho e devolver o payload com a lista de produtos do carrinho atual;
+ 
+ POST /cart
+```bash
+curl -X POST http://localhost:3000/cart \
+  -H "Content-Type: application/json" \
+  -d '{
+    "product_id": 3,
+    "quantity": 2
+  }'
+```
+
+RESPONSE
+```bash
+{
+  "id": 2,
+  "products": [
+    {
+      "id": 3,
+      "name": "Xiamo Mi 27 Pro Plus Master Ultra",
+      "quantity": 2,
+      "unit_price": "999.99",
+      "total_price": "1999.98"
+    }
+  ],
+  "total_price": "1999.98"
+}
+```
+## 2. Listar items do carrinho atual
+- [x] Criar um endpoint para listar os produtos no carrinho atual;
+
+GET /cart
+```bash
+curl http://localhost:3000/cart
+```
+
+RESPONSE
+```bash
+{
+  "id": 2,
+  "products": [
+    {
+      "id": 3,
+      "name": "Xiamo Mi 27 Pro Plus Master Ultra",
+      "quantity": 2,
+      "unit_price": "999.99",
+      "total_price": "1999.98"
+    },
+    {
+      "id": 2,
+      "name": "iPhone 15 Pro Max",
+      "quantity": 1,
+      "unit_price": "14999.99",
+      "total_price": "14999.99"
+    }
+  ],
+  "total_price": "16999.97"
+}
+```
+
+## 3. Alterar a quantidade de produtos no carrinho
+- [x] Adiciona um novo ítem no carrinho;
+- [x] Altera a quantidade se o produto já existir no carrinho;
+
+POST cart/add_item
+```bash
+curl -X POST http://localhost:3000/cart/add_item \
+  -H "Content-Type: application/json" \
+  -d '{
+    "product_id": 3,
+    "quantity": 1
+  }'
+```
+
+RESPONSE
+```bash
+{
+  "id": 2,
+  "products": [
+    {
+      "id": 3,
+      "name": "Xiamo Mi 27 Pro Plus Master Ultra",
+      "quantity": 3,
+      "unit_price": "999.99",
+      "total_price": "2999.97"
+    },
+    {
+      "id": 2,
+      "name": "iPhone 15 Pro Max",
+      "quantity": 1,
+      "unit_price": "14999.99",
+      "total_price": "14999.99"
+    }
+  ],
+  "total_price": "17999.96"
+}
+```
+
+## 4. Remover um produto do carrinho
+- [x] Mensagem de erro apropriada, se o produto não existir no carrinho;
+- [x] Lista de produtos atualizada no carrinho após remover um produto;
+- [x] Carrinho não quebra após remover último produto e ficar vazio;
+
+DELETE /cart/2
+```bash
+# removendo produto
+curl -X DELETE http://localhost:3000/cart/2
+```
+
+RESPONSE
+```bash
+{
+  "id": 2,
+  "products": [
+    {
+      "id": 3,
+      "name": "Xiamo Mi 27 Pro Plus Master Ultra",
+      "quantity": 3,
+      "unit_price": "999.99",
+      "total_price": "2999.97"
+    }
+  ],
+  "total_price": "2999.97"
+}
+```
+
+DELETE /cart/999 
+```bash
+# produto não existe no carrinho
+curl -X DELETE http://localhost:3000/cart/999
+```
+
+RESPONSE
+```bash
+{
+  "error": "Product not found in cart."
+}
+```
+
+DELETE /cart/3
+```bash
+# removendo último produto do carrinho
+curl -X DELETE http://localhost:3000/cart/3
+```
+
+RESPONSE
+```bash
+{
+  "id": 2,
+  "products": [],
+  "total_price": 0
+}
+```
+
+## 5. Excluir carrinhos abandonados
+- [x] Carrinho marcado como abandonado se não houver interação há mais de 3 horas;
+- [x] Carrinho removido se estiver abandonado há mais de 7 dias;
+- [x] Aplicação configurada para o Job ser executado de 1 em 1 hora;
+
+---
+
 # Desafio técnico e-commerce
 
 ## Nossas expectativas
